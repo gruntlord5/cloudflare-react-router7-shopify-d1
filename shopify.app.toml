@@ -1,0 +1,31 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "45062ec0ddf88562bb3b798eb7a98127"
+application_url = "https://cloudflare-worker-shopify-durable-objects.buylisthydrogen.workers.dev/"
+embedded = true
+name = "reactrouter7"
+handle = "reactrouter7"
+
+[build]
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-04"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [ "https://cloudflare-worker-shopify-durable-objects.buylisthydrogen.workers.dev/api/auth" ]
+
+[pos]
+embedded = false

@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cloudflare-react-router7-shopify-d1",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true,
+  "vars": {
+    "SHOPIFY_APP_URL": "https://cloudflare-worker-shopify-durable-objects.buylisthydrogen.workers.dev/",
+    "SCOPES": "write_products"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cloudflare-react-router7-shopify-d1",
+      "database_id": "fabc1923-52d0-4ea6-a4f5-ecbce7b5081f"
+    }
+  ]
+}
