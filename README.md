@@ -1,6 +1,6 @@
 # Shopify App Template - Cloudflare Workers
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/gruntlord5/cloudflare-worker-shopifyd1)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://github.com/gruntlord5/cloudflare-react-router7-shopify-d1)
 
 ## What is this?
 
