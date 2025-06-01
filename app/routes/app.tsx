@@ -9,10 +9,10 @@ import { authenticate } from "../shopify.server";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+  await authenticate.admin(request, context);
 
-  return { apiKey: process.env.SHOPIFY_API_KEY || "" };
+  return Response.json({ apiKey: process.env.SHOPIFY_API_KEY || "" });
 };
 
 export default function App() {
@@ -39,4 +39,4 @@ export function ErrorBoundary() {
 
 export const headers: HeadersFunction = (headersArgs) => {
   return boundary.headers(headersArgs);
-};
+}

@@ -19,14 +19,14 @@ import { loginErrorMessage } from "./error.server";
 
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const errors = loginErrorMessage(await login(request));
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+  const errors = loginErrorMessage(await login(request, context));
 
   return { errors, polarisTranslations };
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const errors = loginErrorMessage(await login(request));
+export const action = async ({ request, context }: ActionFunctionArgs) => {
+  const errors = loginErrorMessage(await login(request, context));
 
   return {
     errors,

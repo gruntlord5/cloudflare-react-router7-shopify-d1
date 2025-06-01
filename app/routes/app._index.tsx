@@ -16,14 +16,14 @@ import {
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
- await authenticate.admin(request);
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+ await authenticate.admin(request, context);
 
  return null;
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
- const { admin } = await authenticate.admin(request);
+export const action = async ({ request, context }: ActionFunctionArgs) => {
+ const { admin } = await authenticate.admin(request, context);
  const color = ["Red", "Orange", "Yellow", "Green"][
    Math.floor(Math.random() * 4)
  ];
@@ -91,6 +91,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
  };
 };
 
+// Rest of the component remains the same
 export default function Index() {
  const fetcher = useFetcher<typeof action>();
 
@@ -288,7 +289,7 @@ export default function Index() {
                        </Link>
                        {", "}
                        <Link
-                         url="https://shopify.dev/docs/apps/tools/app-bridge"
+                         url="https://shopify.dev/docs/tools/app-bridge"
                          target="_blank"
                          removeUnderline
                        >
