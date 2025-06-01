@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "45062ec0ddf88562bb3b798eb7a98127"
-application_url = "https://cloudflare-worker-shopify-durable-objects.buylisthydrogen.workers.dev/"
+application_url = "https://example.com/"
 embedded = true
-name = "reactrouter7"
-handle = "reactrouter7"
+name = "cloudflare-react-router7-shopify-d1"
+handle = "cloudflare-react-router7-shopify-d1"
 
 [build]
 include_config_on_deploy = true
@@ -25,7 +25,7 @@ api_version = "2025-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = [ "https://cloudflare-worker-shopify-durable-objects.buylisthydrogen.workers.dev/api/auth" ]
+redirect_urls = [ "https://example.com/api/auth" ]
 
 [pos]
 embedded = false

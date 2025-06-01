@@ -1,109 +1,178 @@
-# Welcome to React Router + Cloudflare Workers!
+# Shopify App Template - Cloudflare Workers
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/react-router-starter-template)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/gruntlord5/cloudflare-worker-shopifyd1)
 
-![React Router Starter Template Preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/bfdc2f85-e5c9-4c92-128b-3a6711249800/public)
+## What is this?
 
-<!-- dash-content-start -->
+A Shopify app starter, built on top of Cloudflare Workers. This template provides a foundation for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using the [React Router 7](https://reactrouter.com/) framework, deployed on Cloudflare's global network.
 
-A modern, production-ready template for building full-stack React applications using [React Router](https://reactrouter.com/) and the [Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/).
+## Why would I use this?
 
-## Features
+This lets you deploy an entire Shopify React Router 7 starter application to Cloudflare with a single click. It will setup a repo and a Cloudflare worker named after your project, along with a D1 database and binding to store the session data.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+Cloudflare Workers is flexible, scalable, and even has a [free tier for those just getting started.](https://developers.cloudflare.com/workers/platform/pricing/)
 
-<!-- dash-content-end -->
 
-## Getting Started
+| | Requests| Duration | CPU time |
+| - | - | - | - |
+| **Free** | 100,000 per day | No charge for duration | 10 milliseconds of CPU time per invocation |
+| **Standard** | 10 million included per month +$0.30 per additional million | No charge or limit for duration | 30 million CPU milliseconds included per month +$0.02 per additional million CPU milliseconds Max of [5 minutes of CPU time](https://developers.cloudflare.com/workers/platform/limits/#worker-limits) per invocation (default: 30 seconds) Max of 15 minutes of CPU time per [Cron Trigger](https://developers.cloudflare.com/workers/configuration/cron-triggers/) or [Queue Consumer](https://developers.cloudflare.com/queues/configuration/javascript-apis/#consumer) invocation |
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+## Prerequisites
 
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/react-router-starter-template
-```
+Before you begin, you'll need the following:
 
-A live public deployment of this template is available at [https://react-router-starter-template.templates.workers.dev](https://react-router-starter-template.templates.workers.dev)
+1. **Cloudflare Account**: [Sign up](https://dash.cloudflare.com/sign-up) if you don't have one.
+2. **Shopify Partner Account**: [Create an account](https://partners.shopify.com/signup) if you don't have one.
+3. **Shopify App**: Create an app in the [Shopify partner dashboard](https://partners.shopify.com/organizations).
+4. **Test Store**: Set up either a [development store](https://help.shopify.com/en/partners/dashboard/development-stores#create-a-development-store) or a [Shopify Plus sandbox store](https://help.shopify.com/en/partners/dashboard/managing-stores/plus-sandbox-store) for testing your app.
 
-### Installation
+## Quick Start
 
-Install the dependencies:
+1. Click the "Deploy to Cloudflare" button at the top of this README.
+2. Configure your deployment settings including worker name and repository details.
+3. After deployment, update the `wrangler.jsonc` file in your new repository with the credentials from your Shopify app:
 
-```bash
-npm install
-```
+```jsonc
+"vars": {
+ "SHOPIFY_API_KEY": "your_api_key_here", // Don't use this in production, use secrets in the dashboard https://developers.cloudflare.com/workers/configuration/secrets/#adding-secrets-to-your-project
+ "SHOPIFY_API_SECRET": "your_api_secret_here", // Don't use this in production, use secrets in the dashboard https://developers.cloudflare.com/workers/configuration/secrets/#adding-secrets-to-your-project
+ "SHOPIFY_APP_URL": "https://your-worker-name.workers.dev",
+ "SCOPES": "write_products,read_orders", // adjust scopes as needed
+}
+````
+You should consider storing them [as secrets in a production application.](https://developers.cloudflare.com/workers/configuration/secrets/#adding-secrets-to-your-project) 
+## Enabling Additional Databases
+This template supports multiple D1 databases which can be useful for more complex applications. Two additional databases (DB2 and DB3) are included in the configuration but commented out by default. Here's how to enable them:
+1. Create the databases in Cloudflare Dashboard:
+- Go to your Cloudflare Dashboard
+- Navigate to Storage & Databases > D1 SQL Database
+- Click "Create"
+- Name your databases shop_auth_exampledb2 and shop_auth_exampledb3 (these names should match the database name in your wrangler.jsonc)
+- Note the generated database IDs for each
+2. Update your wrangler.jsonc file
+```jsonc
+{
+  // ... other configuration
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shop_auth",
+      "database_id": "151f7d9b-365f-41d7-83ed-0bf4eeef5086"
+    },
+    {
+      "binding": "DB2",
+      "database_name": "shop_auth_exampledb2",
+      "database_id": "your-actual-db2-id-from-dashboard"
+    },
+    {
+      "binding": "DB3",
+      "database_name": "shop_auth_exampledb3",
+      "database_id": "your-actual-db3-id-from-dashboard"
+    }
+  ],
+  // ... rest of configuration
+  ````
 
-### Development
+3. Commit and deploy your changes:
+  - After deployment, your Worker will have access to all three databases. You can access them in your code using the bindings. 
+  - Visit the example page in the app to see how to interact with multiple databases.
 
-Start the development server with HMR:
+## Authenticating and querying data
 
-```bash
-npm run dev
-```
+To authenticate and query data you can use the `shopify` const that is exported from `/app/shopify.server.ts`:
 
-Your application will be available at `http://localhost:5173`.
+```js
+export async function loader({ request }) {
+  const { admin } = await shopify.authenticate.admin(request);
 
-## Typegen
+  const response = await admin.graphql(`
+    {
+      products(first: 25) {
+        nodes {
+          title
+          description
+        }
+      }
+    }`);
 
-Generate types for your Cloudflare bindings in `wrangler.json`:
+  const {
+    data: {
+      products: { nodes },
+    },
+  } = await response.json();
 
-```sh
-npm run typegen
-```
+  return nodes;
+}
+````
 
-## Building for Production
+This template comes preconfigured with examples of:
 
-Create a production build:
+1. Setting up your Shopify app in [/app/shopify.server.ts](https://github.com/Shopify/shopify-app-template-remix/blob/main/app/shopify.server.ts)
+2. Querying data using Graphql. Please see: [/app/routes/app.\_index.tsx](https://github.com/Shopify/shopify-app-template-remix/blob/main/app/routes/app._index.tsx).
+3. Responding to mandatory webhooks in [/app/routes/webhooks.tsx](https://github.com/Shopify/shopify-app-template-remix/blob/main/app/routes/webhooks.tsx)
 
-```bash
-npm run build
-```
+Please read the [documentation for @shopify/shopify-app-remix](https://www.npmjs.com/package/@shopify/shopify-app-remix#authenticating-admin-requests) to understand what other API's are available.
 
-## Previewing the Production Build
+## Troubleshooting
 
-Preview the production build locally:
+### Updating the URL for your App
 
-```bash
-npm run preview
-```
+You may get an error similar to this "Error: Invalid appUrl configuration 'example.workers.dev', please provide a valid URL." When trying to update the domain in wrangler.jsonc
 
-## Deployment
+Make sure you have the url formatted properly, in this example it would be "https://example.workers.dev/"
 
-If you don't have a Cloudflare account, [create one here](https://dash.cloudflare.com/sign-up)! Go to your [Workers dashboard](https://dash.cloudflare.com/?to=%2F%3Aaccount%2Fworkers-and-pages) to see your [free custom Cloudflare Workers subdomain](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/) on `*.workers.dev`.
+### Navigating/redirecting breaks an embedded app
 
-Once that's done, you can build your app:
+Embedded Shopify apps must maintain the user session, which can be tricky inside an iFrame. To avoid issues:
 
-```sh
-npm run build
-```
+1. Use `Link` from `react-router` or `@shopify/polaris`. Do not use `<a>`.
+2. Use the `redirect` helper returned from `authenticate.admin`. Do not use `redirect` from `react-router`
+3. Use `useSubmit` or `<Form/>` from `react-router`. Do not use a lowercase `<form/>`.
 
-And deploy it:
+This only applies if your app is embedded, which it will be by default.
 
-```sh
-npm run deploy
-```
+### Non Embedded
 
-To deploy a preview URL:
+Shopify apps are best when they are embedded in the Shopify Admin, which is how this template is configured. If you have a reason to not embed your app please make the following changes:
 
-```sh
-npx wrangler versions upload
-```
+1. Ensure `embedded = false` is set in [shopify.app.toml`](./shopify.app.toml). [Docs here](https://shopify.dev/docs/apps/build/cli-for-apps/app-configuration#global).
+2. Pass `isEmbeddedApp: false` to `shopifyApp()` in `./app/shopify.server.js|ts`.
+3. Change the `isEmbeddedApp` prop to `isEmbeddedApp={false}` for the `AppProvider` in `/app/routes/app.jsx|tsx`.
+4. Remove the `@shopify/app-bridge-react` dependency from [package.json](./package.json) and `vite.config.ts|js`.
+5. Remove anything imported from `@shopify/app-bridge-react`.  For example: `NavMenu`, `TitleBar` and `useAppBridge`.
 
-You can then promote a version to production after verification or roll it out progressively.
+### OAuth goes into a loop when I change my app's scopes
 
-```sh
-npx wrangler versions deploy
-```
+If you change your app's scopes and authentication goes into a loop and fails with a message from Shopify that it tried too many times, you might have forgotten to update your scopes with Shopify.
+To do that, you can run the `deploy` CLI command.
 
-## Styling
+### My shop-specific webhook subscriptions aren't updated
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+If you are registering webhooks in the `afterAuth` hook, using `shopify.registerWebhooks`, you may find that your subscriptions aren't being updated.  
 
----
+Instead of using the `afterAuth` hook, the recommended approach is to declare app-specific webhooks in the `shopify.app.toml` file.  This approach is easier since Shopify will automatically update changes to webhook subscriptions every time you run `deploy`.  Please read these guides to understand more:
 
-Built with ❤️ using React Router.
+1. [app-specific vs shop-specific webhooks](https://shopify.dev/docs/apps/build/webhooks/subscribe#app-specific-subscriptions)
+2. [Create a subscription tutorial](https://shopify.dev/docs/apps/build/webhooks/subscribe/get-started?framework=remix&deliveryMethod=https)
+
+## Tech Stack
+
+This template uses [React Router 7](https://reactrouter.com/) with Cloudflare Workers. The following Shopify tools are also included to ease app development:
+
+- [Shopify App React Router 7](https://shopify.dev/docs/api/shopify-app-remix) provides authentication and methods for interacting with Shopify APIs.
+- [Shopify App Bridge](https://shopify.dev/docs/apps/tools/app-bridge) allows your app to seamlessly integrate your app within Shopify's Admin.
+- [Polaris React](https://polaris.shopify.com/) is a powerful design system and component library that helps developers build high quality, consistent experiences for Shopify merchants.
+- [Webhooks](https://github.com/Shopify/shopify-app-js/tree/main/packages/shopify-app-remix#authenticating-webhook-requests): Callbacks sent by Shopify when certain events occur
+
+## Resources
+
+- [React Router 7 Docs](https://reactrouter.com/home)
+- [Shopify App Remix](https://shopify.dev/docs/api/shopify-app-remix)
+- [Introduction to Shopify apps](https://shopify.dev/docs/apps/getting-started)
+- [App authentication](https://shopify.dev/docs/apps/auth)
+- [Shopify CLI](https://shopify.dev/docs/apps/tools/cli)
+- [App extensions](https://shopify.dev/docs/apps/app-extensions/list)
+- [Shopify Functions](https://shopify.dev/docs/api/functions)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+- [Cloudflare D1 Documentation](https://developers.cloudflare.com/d1/)
