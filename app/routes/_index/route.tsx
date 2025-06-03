@@ -51,7 +51,7 @@ export default function App() {
                     textAlign: 'center',
                     padding: '20px 0'
                   }}>
-                    <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/gruntlord5/cloudflare-worker-shopifyd1/">
+                    <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/gruntlord5/cloudflare-react-router7-shopify-d1">
                       <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare"/>
                     </a>
                   </div>
