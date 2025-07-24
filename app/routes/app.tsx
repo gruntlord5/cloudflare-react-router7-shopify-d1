@@ -1,38 +1,44 @@
-import type { HeadersFunction, LoaderFunctionArgs } from "react-router";
+import type { HeadersFunction, LoaderFunctionArgs, LinksFunction } from "react-router";
 import { Link, Outlet, useLoaderData, useRouteError } from "react-router";
-import { boundary } from "@brandboostinggmbh/shopify-app-react-router/server";
-import { AppProvider } from "@brandboostinggmbh/shopify-app-react-router/react";
+import { boundary } from "@shopify/shopify-app-react-router/server";
+import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { NavMenu } from "@shopify/app-bridge-react";
+import { AppProvider as PolarisAppProvider } from "@shopify/polaris";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
+import polarisTranslations from "@shopify/polaris/locales/en.json";
 
 import { authenticate } from "../shopify.server";
 
-export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
+export const links: LinksFunction = () => [{ rel: "stylesheet", href: polarisStyles }];
 
-export const loader = async ({ request, context }: LoaderFunctionArgs) => {
-  await authenticate.admin(request, context);
+export const loader = async (args: LoaderFunctionArgs) => {
+  await authenticate.admin(args.request, args.context);
 
-  return Response.json({ apiKey: process.env.SHOPIFY_API_KEY || "" });
+  // Get API key from context
+  const apiKey = args.context?.cloudflare?.env?.SHOPIFY_API_KEY || process.env.SHOPIFY_API_KEY || "";
+  return { apiKey };
 };
 
 export default function App() {
   const { apiKey } = useLoaderData<typeof loader>();
 
   return (
-    <AppProvider isEmbeddedApp apiKey={apiKey}>
-      <NavMenu>
-        <Link to="/app" rel="home">
-          Home
-        </Link>
-        <Link to="/app/d1example">D1 Example</Link>
-        <Link to="/app/additional">Additional page</Link>
-      </NavMenu>
-      <Outlet />
+    <AppProvider embedded apiKey={apiKey}>
+      <PolarisAppProvider i18n={polarisTranslations}>
+        <NavMenu>
+          <Link to="/app" rel="home">
+            Home
+          </Link>
+          <Link to="/app/additional">Additional page</Link>
+          <Link to="/app/d1example">D1 Example</Link>
+        </NavMenu>
+        <Outlet />
+      </PolarisAppProvider>
     </AppProvider>
   );
 }
 
-// Shopify needs Remix to catch some thrown responses, so that their headers are included in the response.
+// Shopify needs React Router to catch some thrown responses, so that their headers are included in the response.
 export function ErrorBoundary() {
   return boundary.error(useRouteError());
 }

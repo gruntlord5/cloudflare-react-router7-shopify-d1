@@ -2,7 +2,7 @@ import {
   ApiVersion,
   AppDistribution,
   shopifyApp,
-} from "@brandboostinggmbh/shopify-app-react-router/server";
+} from "@shopify/shopify-app-react-router/server";
 import { Session } from "@shopify/shopify-api";
 import { SessionStorage } from "@shopify/shopify-app-session-storage";
 import {
@@ -64,6 +64,11 @@ export function createShopifyApp(context: DatabaseContext) {
       ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
       : {}),
   });
+}
+
+// For Cloudflare runtime, we need to get the shopify instance from context
+export function getShopify(context: DatabaseContext) {
+  return createShopifyApp(context);
 }
 
 export const apiVersion = ApiVersion.January25;

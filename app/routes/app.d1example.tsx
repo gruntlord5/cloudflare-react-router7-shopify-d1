@@ -12,18 +12,19 @@ import {
   type DatabaseKey 
 } from "../utils/db.service";
 
+
 /**
  * Loader function that runs on the server to prepare data for the route
  */
-export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+export const loader = async (args: LoaderFunctionArgs) => {
   // Authenticate the admin user before proceeding
-  await authenticate.admin(request, context);
+  await authenticate.admin(args.request, args.context);
   
   // Add debugging to see what's in the context
-  console.log("Context structure in loader:", getDatabaseDebugInfo(context));
+  console.log("Context structure in loader:", getDatabaseDebugInfo(args.context));
   
   // Load data from all databases
-  const databases = await loadAllDatabaseSettings(context);
+  const databases = await loadAllDatabaseSettings(args.context);
   
   // Return data in the format expected by the UI
   const [db1, db2, db3] = databases;
@@ -37,12 +38,12 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 /**
  * Action function to handle form submissions
  */
-export async function action({ request, context }: ActionFunctionArgs) {
+export async function action(args: ActionFunctionArgs) {
   // Authenticate the admin user
-  await authenticate.admin(request, context);
+  await authenticate.admin(args.request, args.context);
   
   // Parse the form data from the request
-  const formData = await request.formData();
+  const formData = await args.request.formData();
   const action = formData.get("action") as string;
   const dbTarget = formData.get("dbTarget") as string;
   
@@ -58,7 +59,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     };
     
     const dbKey = dbKeyMap[dbTarget] || "DB";
-    const result = await updateDatabaseSetting(context, dbKey, isChecked);
+    const result = await updateDatabaseSetting(args.context, dbKey, isChecked);
     
     // Return result with dbTarget for UI consistency
     return Response.json({
@@ -174,12 +175,12 @@ export default function Index() {
         onChange={onChange}
       />
       {error && (
-        <Text as="p" variant="bodyMd" color="critical">
+        <Text as="p" variant="bodyMd" tone="critical">
           Error: {error}
         </Text>
       )}
       {!isAvailable && (
-        <Text as="p" variant="bodyMd" color="subdued">
+        <Text as="p" variant="bodyMd" tone="subdued">
           Note: Database {dbName} is not available. {dbName === "DB1" ? db1.error : dbName === "DB2" ? db2.error : db3.error}
         </Text>
       )}
@@ -218,13 +219,13 @@ export default function Index() {
               </table>
             </div>
           ) : (
-            <Text as="p" variant="bodyMd" color="subdued">
+            <Text as="p" variant="bodyMd" tone="subdued">
               No data available in {dbName}. Click the checkbox above to write test data.
             </Text>
           )}
         </>
       ) : (
-        <Text as="p" variant="bodyMd" color="critical">
+        <Text as="p" variant="bodyMd" tone="critical">
           {dbName} Error: {error}
         </Text>
       )}
@@ -235,73 +236,73 @@ export default function Index() {
   return (
     <Page title="Multiple D1 Database Example">
       <Layout>
-        {/* Consolidated Settings Card */}
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="400">
-              <Text as="h2" variant="headingMd">
-                Database Settings
-              </Text>
-              <Text as="p" variant="bodyMd">
-                Toggle these checkboxes to write values to each database. Changes will be reflected in the table below.
-              </Text>
-              
-              {/* DB1 Settings */}
-              {renderDatabaseSection(
-                "DB1", 
-                checkboxStateDB1, 
-                (checked) => handleCheckboxChange("DB1", checked),
-                db1.dbAvailable,
-                saveErrorDB1
-              )}
-              
-              {/* DB2 Settings */}
-              {renderDatabaseSection(
-                "DB2", 
-                checkboxStateDB2, 
-                (checked) => handleCheckboxChange("DB2", checked),
-                db2.dbAvailable,
-                saveErrorDB2
-              )}
-              
-              {/* DB3 Settings */}
-              {renderDatabaseSection(
-                "DB3", 
-                checkboxStateDB3, 
-                (checked) => handleCheckboxChange("DB3", checked),
-                db3.dbAvailable,
-                saveErrorDB3
-              )}
-            </BlockStack>
-          </Card>
-        </Layout.Section>
-        
-        {/* Consolidated Database Contents Card */}
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="600">
-              <Text as="h2" variant="headingMd">
-                Database Contents
-              </Text>
-              
-              {/* DB1 Contents */}
-              {renderDatabaseTable("DB1", db1.tableName, tableDataDB1, db1.dbAvailable, db1.error)}
-              
-              {/* Divider */}
-              <div style={{ borderBottom: '1px solid #ddd', width: '100%' }}></div>
-              
-              {/* DB2 Contents */}
-              {renderDatabaseTable("DB2", db2.tableName, tableDataDB2, db2.dbAvailable, db2.error)}
-              
-              {/* Divider */}
-              <div style={{ borderBottom: '1px solid #ddd', width: '100%' }}></div>
-              
-              {/* DB3 Contents */}
-              {renderDatabaseTable("DB3", db3.tableName, tableDataDB3, db3.dbAvailable, db3.error)}
-            </BlockStack>
-          </Card>
-        </Layout.Section>
-      </Layout>
-    </Page>
+      {/* Consolidated Settings Card */}
+      <Layout.Section>
+        <Card>
+          <BlockStack gap="400">
+            <Text as="h2" variant="headingMd">
+              Database Settings
+            </Text>
+            <Text as="p" variant="bodyMd">
+              Toggle these checkboxes to write values to each database. Changes will be reflected in the table below.
+            </Text>
+            
+            {/* DB1 Settings */}
+            {renderDatabaseSection(
+              "DB1", 
+              checkboxStateDB1, 
+              (checked) => handleCheckboxChange("DB1", checked),
+              db1.dbAvailable,
+              saveErrorDB1
+            )}
+            
+            {/* DB2 Settings */}
+            {renderDatabaseSection(
+              "DB2", 
+              checkboxStateDB2, 
+              (checked) => handleCheckboxChange("DB2", checked),
+              db2.dbAvailable,
+              saveErrorDB2
+            )}
+            
+            {/* DB3 Settings */}
+            {renderDatabaseSection(
+              "DB3", 
+              checkboxStateDB3, 
+              (checked) => handleCheckboxChange("DB3", checked),
+              db3.dbAvailable,
+              saveErrorDB3
+            )}
+          </BlockStack>
+        </Card>
+      </Layout.Section>
+      
+      {/* Consolidated Database Contents Card */}
+      <Layout.Section>
+        <Card>
+          <BlockStack gap="600">
+            <Text as="h2" variant="headingMd">
+              Database Contents
+            </Text>
+            
+            {/* DB1 Contents */}
+            {renderDatabaseTable("DB1", db1.tableName, tableDataDB1, db1.dbAvailable, db1.error)}
+            
+            {/* Divider */}
+            <div style={{ borderBottom: '1px solid #ddd', width: '100%' }}></div>
+            
+            {/* DB2 Contents */}
+            {renderDatabaseTable("DB2", db2.tableName, tableDataDB2, db2.dbAvailable, db2.error)}
+            
+            {/* Divider */}
+            <div style={{ borderBottom: '1px solid #ddd', width: '100%' }}></div>
+            
+            {/* DB3 Contents */}
+            {renderDatabaseTable("DB3", db3.tableName, tableDataDB3, db3.dbAvailable, db3.error)}
+          </BlockStack>
+        </Card>
+      </Layout.Section>
+    </Layout>
+  </Page>
   );
 }

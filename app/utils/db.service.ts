@@ -134,9 +134,11 @@ export async function loadDatabaseSettings(context: any, config: DatabaseConfig)
     
     // Retrieve the current value of the checkbox setting
     const result = await getSetting(db, config.tableName, config.settingKey);
+    console.log(`Loading setting for ${config.key}:`, result);
     
     // Convert string value to boolean
     const isChecked = result && result.value === "true";
+    console.log(`Converted isChecked for ${config.key}:`, isChecked);
     
     // Fetch all settings to display in the UI table
     const allSettings = await getAllSettings(db, config.tableName);
@@ -189,7 +191,9 @@ export async function updateDatabaseSetting(context: any, dbKey: string, isCheck
 
   try {
     // Update the setting using direct database calls
-    await updateSetting(db, config.tableName, config.settingKey, isChecked ? "true" : "false");
+    const valueToSave = isChecked ? "true" : "false";
+    console.log(`Saving setting for ${config.key}: ${valueToSave}`);
+    await updateSetting(db, config.tableName, config.settingKey, valueToSave);
     
     // Fetch the updated settings list
     const allSettings = await getAllSettings(db, config.tableName);
