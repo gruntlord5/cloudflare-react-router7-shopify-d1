@@ -1,57 +1,79 @@
 import type { LoaderFunctionArgs } from "react-router";
 import { redirect } from "react-router";
-import { Form, useLoaderData } from "react-router";
+import { Form, useLoaderData, useNavigate } from "react-router";
+import { AppProvider } from "@shopify/shopify-app-react-router/react";
+import { login } from "../../shopify.server";
 
-import styles from "./styles.module.css";
+const APP_NAME = "Shopify App Template - Cloudflare Workers";
+const APP_HANDLE = "cf-worker-shopify";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
 
   if (url.searchParams.get("shop")) {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
-  // Always show the form for login in production
-  return { showForm: true };
+  return { showForm: Boolean(login) };
 };
 
 export default function App() {
   const { showForm } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
 
   return (
-    <div className={styles.index}>
-      <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
-        <p className={styles.text}>
-          A tagline about [your app] that describes your value proposition.
-        </p>
+    <AppProvider embedded={false}>
+      <s-page>
+        <s-section heading="Welcome to Shopify App Template - Cloudflare Workers">
+          <s-paragraph>
+            This is an example of what your domain would look like if a user visits from outside of Shopify App Bridge. You can customize this page to your liking, just make sure to enter the
+            information for your application and remove this placeholder.
+          </s-paragraph>
+          <div style={{ 
+            textAlign: 'center',
+            padding: '20px 0'
+          }}>
+            <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/gruntlord5/cloudflare-worker-shopifyd1/">
+              <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare"/>
+            </a>
+          </div>
+          <s-paragraph>
+            Just enter your shopify domain below and click log in. For example{' '}
+            <s-link href="https://admin.shopify.com/apps/bulk-product-categories/app">
+              example-store.myshopify.com
+            </s-link>.
+          </s-paragraph>
+        </s-section>
+
         {showForm && (
-          <Form className={styles.form} method="post" action="/auth/login">
-            <label className={styles.label}>
-              <span>Shop domain</span>
-              <input className={styles.input} type="text" name="shop" />
-              <span>e.g: my-shop-domain.myshopify.com</span>
-            </label>
-            <button className={styles.button} type="submit">
-              Log in
-            </button>
-          </Form>
+          <s-section heading="Log in">
+            <Form method="post" action="/auth/login">
+              <s-stack direction="block" gap="base">
+                <s-text-field
+                  label="Shop domain"
+                  type="text"
+                  name="shop"
+                  helpText="e.g: example-store.myshopify.com"
+                  autoComplete="off"
+                />
+                <s-button submit primary>
+                  Log in
+                </s-button>
+              </s-stack>
+            </Form>
+          </s-section>
         )}
-        <ul className={styles.list}>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-        </ul>
-      </div>
-    </div>
+
+        <s-section heading="Privacy Policy">
+          <s-paragraph>
+            For information about how we handle your data, please review our{' '}
+            <s-link onClick={() => navigate('/privacypolicy')}>
+              Privacy Policy
+            </s-link>.
+          </s-paragraph>
+        </s-section>
+      </s-page>
+    </AppProvider>
   );
 }
