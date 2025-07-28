@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "react-router";
-import { Page, Layout, Card, Text, BlockStack, Checkbox } from "@shopify/polaris";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import { useLoaderData, useFetcher } from "react-router";
 import { 
@@ -75,7 +74,7 @@ export async function action(args: ActionFunctionArgs) {
 /**
  * Main component for the settings page
  */
-export default function Index() {
+export default function D1Example() {
   // Get the Shopify app bridge instance for UI interactions
   const shopify = useAppBridge();
   
@@ -167,142 +166,115 @@ export default function Index() {
    * Render a database settings section for each DB
    */
   const renderDatabaseSection = (dbName: string, isChecked: boolean, onChange: (checked: boolean) => void, isAvailable: boolean, error: string) => (
-    <BlockStack gap="200">
-      <Checkbox
-        label={isChecked ? `${dbName}: This box is checked` : `${dbName}: This box is not checked`}
+    <s-stack direction="block" gap="tight">
+      <s-checkbox
         checked={isChecked}
         disabled={fetcher.state !== "idle" || !isAvailable}
-        onChange={onChange}
+        onChange={(e) => onChange(e.target.checked)}
+        label={isChecked ? `${dbName}: This box is checked` : `${dbName}: This box is not checked`}
       />
       {error && (
-        <Text as="p" variant="bodyMd" tone="critical">
-          Error: {error}
-        </Text>
+        <s-text tone="critical">Error: {error}</s-text>
       )}
       {!isAvailable && (
-        <Text as="p" variant="bodyMd" tone="subdued">
+        <s-text tone="subdued">
           Note: Database {dbName} is not available. {dbName === "DB1" ? db1.error : dbName === "DB2" ? db2.error : db3.error}
-        </Text>
+        </s-text>
       )}
-    </BlockStack>
+    </s-stack>
   );
 
   /**
    * Render a table for database contents
    */
   const renderDatabaseTable = (dbName: string, tableName: string, tableData: any[], isAvailable: boolean, error: string | null) => (
-    <BlockStack gap="400">
-      <Text as="h3" variant="headingSm">
-        {dbName}: {tableName}
-      </Text>
+    <s-stack direction="block" gap="base">
+      <s-heading level="3">{dbName}: {tableName}</s-heading>
       {isAvailable ? (
         <>
           {tableData && tableData.length > 0 ? (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #ddd' }}>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Key</th>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Value</th>
-                    <th style={{ textAlign: 'left', padding: '8px' }}>Last Updated</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.map((row, index) => (
-                    <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '8px' }}>{row.key}</td>
-                      <td style={{ padding: '8px' }}>{row.value}</td>
-                      <td style={{ padding: '8px' }}>{formatDate(row.updated_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <s-table>
+              <s-table-header-row>
+                <s-table-header>Key</s-table-header>
+                <s-table-header>Value</s-table-header>
+                <s-table-header>Last Updated</s-table-header>
+              </s-table-header-row>
+              <s-table-body>
+                {tableData.map((row, index) => (
+                  <s-table-row key={index}>
+                    <s-table-cell>{row.key}</s-table-cell>
+                    <s-table-cell>{row.value}</s-table-cell>
+                    <s-table-cell>{formatDate(row.updated_at)}</s-table-cell>
+                  </s-table-row>
+                ))}
+              </s-table-body>
+            </s-table>
           ) : (
-            <Text as="p" variant="bodyMd" tone="subdued">
+            <s-text tone="subdued">
               No data available in {dbName}. Click the checkbox above to write test data.
-            </Text>
+            </s-text>
           )}
         </>
       ) : (
-        <Text as="p" variant="bodyMd" tone="critical">
-          {dbName} Error: {error}
-        </Text>
+        <s-text tone="critical">{dbName} Error: {error}</s-text>
       )}
-    </BlockStack>
+    </s-stack>
   );
 
-  // Render the UI with consolidated cards
+  // Render the UI with web components
   return (
-    <Page title="Multiple D1 Database Example">
-      <Layout>
-      {/* Consolidated Settings Card */}
-      <Layout.Section>
-        <Card>
-          <BlockStack gap="400">
-            <Text as="h2" variant="headingMd">
-              Database Settings
-            </Text>
-            <Text as="p" variant="bodyMd">
-              Toggle these checkboxes to write values to each database. Changes will be reflected in the table below.
-            </Text>
-            
-            {/* DB1 Settings */}
-            {renderDatabaseSection(
-              "DB1", 
-              checkboxStateDB1, 
-              (checked) => handleCheckboxChange("DB1", checked),
-              db1.dbAvailable,
-              saveErrorDB1
-            )}
-            
-            {/* DB2 Settings */}
-            {renderDatabaseSection(
-              "DB2", 
-              checkboxStateDB2, 
-              (checked) => handleCheckboxChange("DB2", checked),
-              db2.dbAvailable,
-              saveErrorDB2
-            )}
-            
-            {/* DB3 Settings */}
-            {renderDatabaseSection(
-              "DB3", 
-              checkboxStateDB3, 
-              (checked) => handleCheckboxChange("DB3", checked),
-              db3.dbAvailable,
-              saveErrorDB3
-            )}
-          </BlockStack>
-        </Card>
-      </Layout.Section>
+    <s-page>
+      <TitleBar title="Multiple D1 Database Example" />
       
-      {/* Consolidated Database Contents Card */}
-      <Layout.Section>
-        <Card>
-          <BlockStack gap="600">
-            <Text as="h2" variant="headingMd">
-              Database Contents
-            </Text>
-            
-            {/* DB1 Contents */}
-            {renderDatabaseTable("DB1", db1.tableName, tableDataDB1, db1.dbAvailable, db1.error)}
-            
-            {/* Divider */}
-            <div style={{ borderBottom: '1px solid #ddd', width: '100%' }}></div>
-            
-            {/* DB2 Contents */}
-            {renderDatabaseTable("DB2", db2.tableName, tableDataDB2, db2.dbAvailable, db2.error)}
-            
-            {/* Divider */}
-            <div style={{ borderBottom: '1px solid #ddd', width: '100%' }}></div>
-            
-            {/* DB3 Contents */}
-            {renderDatabaseTable("DB3", db3.tableName, tableDataDB3, db3.dbAvailable, db3.error)}
-          </BlockStack>
-        </Card>
-      </Layout.Section>
-    </Layout>
-  </Page>
+      {/* Database Settings Section */}
+      <s-section heading="Database Settings">
+        <s-paragraph>
+          Toggle these checkboxes to write values to each database. Changes will be reflected in the table below.
+        </s-paragraph>
+        
+        <s-stack direction="block" gap="large">
+          {/* DB1 Settings */}
+          {renderDatabaseSection(
+            "DB1", 
+            checkboxStateDB1, 
+            (checked) => handleCheckboxChange("DB1", checked),
+            db1.dbAvailable,
+            saveErrorDB1
+          )}
+          
+          {/* DB2 Settings */}
+          {renderDatabaseSection(
+            "DB2", 
+            checkboxStateDB2, 
+            (checked) => handleCheckboxChange("DB2", checked),
+            db2.dbAvailable,
+            saveErrorDB2
+          )}
+          
+          {/* DB3 Settings */}
+          {renderDatabaseSection(
+            "DB3", 
+            checkboxStateDB3, 
+            (checked) => handleCheckboxChange("DB3", checked),
+            db3.dbAvailable,
+            saveErrorDB3
+          )}
+        </s-stack>
+      </s-section>
+      
+      {/* Database Contents Section */}
+      <s-section heading="Database Contents">
+        <s-stack direction="block" gap="extra-large">
+          {/* DB1 Contents */}
+          {renderDatabaseTable("DB1", db1.tableName, tableDataDB1, db1.dbAvailable, db1.error)}
+          
+          {/* DB2 Contents */}
+          {renderDatabaseTable("DB2", db2.tableName, tableDataDB2, db2.dbAvailable, db2.error)}
+          
+          {/* DB3 Contents */}
+          {renderDatabaseTable("DB3", db3.tableName, tableDataDB3, db3.dbAvailable, db3.error)}
+        </s-stack>
+      </s-section>
+    </s-page>
   );
 }
